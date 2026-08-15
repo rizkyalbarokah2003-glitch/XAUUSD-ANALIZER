@@ -234,12 +234,3 @@ Jika timeframe atau level tidak terbaca dari gambar, jangan menebak.
         raise HTTPException(502, "AI mengembalikan format yang tidak valid.") from exc
 
     return normalize_result(parsed)
-    except Exception as exc:
-        raise HTTPException(502, f"AI request gagal: {exc}") from exc
-
-    try:
-        parsed = json.loads(response.output_text)
-    except Exception as exc:
-        raise HTTPException(502, "AI mengembalikan format yang tidak valid.") from exc
-
-    return normalize_result(parsed)
