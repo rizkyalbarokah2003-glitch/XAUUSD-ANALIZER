@@ -197,30 +197,43 @@ Jika timeframe atau level tidak terbaca dari gambar, jangan menebak.
 """
 
     try:
-        response = client.responses.create(
+
+        response = client.chat.completions.create(
             model=MODEL,
-            input=[
+            messages=[
                 {
                     "role": "system",
-                    "content": [{"type": "input_text", "text": SYSTEM_PROMPT}],
+                    "content": SYSTEM_PROMPT,
                 },
                 {
                     "role": "user",
                     "content": [
-                        {"type": "input_text", "text": user_prompt},
-                        {"type": "input_image", "image_url": data_url},
+                        {"type": "text", "text": user_prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": data_url},
+                        },
                     ],
                 },
             ],
-            text={
-                "format": {
-                    "type": "json_schema",
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
                     "name": "xau_analysis",
                     "strict": True,
                     "schema": SCHEMA,
-                }
+                },
             },
         )
+    except Exception as exc:
+        raise HTTPException(502, f"AI request gagal: {exc}") from exc
+
+    try:
+        parsed = json.loads(response.choices[0].message.content)
+    except Exception as exc:
+        raise HTTPException(502, "AI mengembalikan format yang tidak valid.") from exc
+
+    return normalize_result(parsed)
     except Exception as exc:
         raise HTTPException(502, f"AI request gagal: {exc}") from exc
 
