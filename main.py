@@ -12,7 +12,7 @@ from openai import OpenAI
 APP_DIR = Path(__file__).resolve().parent
 FRONTEND = APP_DIR / "XAU_ANALYZER_AI_v4_LIVE_HP.html"
 
-MODEL = os.getenv("OPENAI_MODEL", "gpt-40.mini")
+MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 MAX_BYTES = 10 * 1024 * 1024
 
 app = FastAPI(title="XAU Analyzer AI v4")
@@ -196,7 +196,7 @@ Analisis screenshot XAU/USD ini. Fokus pada price action yang benar-benar terlih
 Jika timeframe atau level tidak terbaca dari gambar, jangan menebak.
 """
 
-        try:
+    try:
         response = client.chat.completions.create(
             model=MODEL,
             messages=[
@@ -225,7 +225,8 @@ Jika timeframe atau level tidak terbaca dari gambar, jangan menebak.
         raise HTTPException(502, f"AI request gagal: {exc}") from exc
 
     try:
-        # Perbaikan cara mengekstrak teks JSON dari respons OpenAI terbaru
         parsed = json.loads(response.choices[0].message.content)
     except Exception as exc:
         raise HTTPException(502, "AI mengembalikan format yang tidak valid.") from exc
+
+    return normalize_result(parsed)
